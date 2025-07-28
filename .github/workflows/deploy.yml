@@ -1,0 +1,33 @@
+name: Deploy Entra External ID Flow
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+        id-token: write # Require write permission to Fetch an OIDC token.
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Build Module
+        shell: pwsh
+        run: |
+            Install-Module Microsoft.Graph.Beta -Repository PSGallery -Force
+            Install-Module -Name MSAL.PS -Scope CurrentUser -Force
+
+      - name: Azure CLI Login
+        uses: azure/login@v2
+        with:
+            client-id: ${{ secrets.AZURE_CLIENT_ID }}
+            tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+            allow-no-subscriptions: true
+      
+      - name: GraphAPI
+        run: |
+            ./scripts/deploy-entra-external-id.ps1
+        shell: pwsh
