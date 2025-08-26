@@ -1,13 +1,4 @@
-
-$accessToken = az account get-access-token --resource https://graph.microsoft.com `
-    --query accessToken --output tsv
-write-host "::add-mask::$accessToken"
-$accessToken = $accessToken | ConvertTo-SecureString -AsPlainText -Force
-Connect-MgGraph -AccessToken $accessToken -NoWelcome
-
-Get-MgUser -Count userCount -ConsistencyLevel eventual
-
-# Define the External ID flow payload (customize as needed)
+# Define the External ID flow payload
 $params =  @{
     "@odata.type" = "#microsoft.graph.externalUsersSelfServiceSignUpEventsFlow"
     displayName = "Default sign-up and sign-in"

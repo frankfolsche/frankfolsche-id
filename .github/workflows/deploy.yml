@@ -14,20 +14,45 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Build Module
+       # Run a command to check PowerShell version
+      - name: Check PowerShell version
         shell: pwsh
-        run: |
-            Install-Module Microsoft.Graph.Beta -Repository PSGallery -Force
-            Install-Module -Name MSAL.PS -Scope CurrentUser -Force
+        run: Write-Host $PSVersionTable.PSVersion
 
-      - name: Azure CLI Login
-        uses: azure/login@v2
+        # Setup cache for Microsoft Graph PowerShell
+      - name: Setup PowerShell module cache
+        id: cacher
+        uses: actions/cache@v3
         with:
-            client-id: ${{ secrets.AZURE_CLIENT_ID }}
-            tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-            allow-no-subscriptions: true
-      
-      - name: GraphAPI
-        run: |
-            ./scripts/deploy-entra-external-id.ps1
+            path: "~/.local/share/powershell/Modules"
+            key: ${{ runner.os }}-MicrosoftGraphBeta
+
+        # Install Microsoft Graph PowerShell modules
+      - name: Install required PowerShell modules
+        if: steps.cacher.outputs.cache-hit != 'true'
         shell: pwsh
+        run: |
+              Set-PSRepository PSGallery -InstallationPolicy Trusted
+              Install-Module Microsoft.Graph.Authentication -ErrorAction Stop
+              Import-Module Microsoft.Graph.Authentication
+              Install-Module Microsoft.Graph.Beta.Identity -ErrorAction Stop
+              Import-Module Microsoft.Graph.Beta.Identity.SignIns
+
+        # Connect to Entra ID, run the PowerShell script and disconnect
+      - name: Connect, run the script and disconnect
+        shell: pwsh
+        env:
+            TenantId: ${{ secrets.AZURE_TENANT_ID }}
+            ClientId: ${{ secrets.AZURE_CLIENT_ID }}
+            ClientSecret: ${{ secrets.AZURE_CLIENT_SECRET }}
+        run: |
+          Write-Host "Connect to Microsoft Entra ID with app ID and app secret"
+          $SecuredPassword = ConvertTo-SecureString -String "$env:ClientSecret" -AsPlainText -Force
+          $ClientSecretCredential = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList "$env:ClientId", $SecuredPassword
+      
+          Connect-MgGraph -TenantId "$env:TenantId" -ClientSecretCredential $ClientSecretCredential -NoWelcome
+      
+          ./scripts/deploy-entra-external-id.ps1
+      
+          Write-Host "Disconnect from Microsoft Entra ID"
+          Disconnect-MgGraph  | Out-Null
