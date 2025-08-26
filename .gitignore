@@ -3,3 +3,7 @@
 ################################################################################
 
 /.vs
+/UserManager/.vs/UserManager
+/UserManager/obj
+/UserManager/.vs/UserManager.slnx
+/UserManager/bin/Debug/net10.0
