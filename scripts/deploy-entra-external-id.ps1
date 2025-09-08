@@ -128,3 +128,10 @@ if ($null -eq $existingFlow) {
 }
 
 
+$params =  @{
+    id = "0"
+    backgroundColor = "#3498DB"
+    signInPageText = "Welcome to Azure Fest"
+}
+
+Update-MgOrganizationBrandingLocalization -OrganizationId $env:TenantId -OrganizationalBrandingLocalizationId 0 -BodyParameter $params

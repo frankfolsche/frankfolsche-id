@@ -2,7 +2,7 @@ name: Deploy Entra External ID Flow
 
 on:
   push:
-    branches: [ main ]
+    branches: [ main, theme ]
 
 jobs:
   deploy:
