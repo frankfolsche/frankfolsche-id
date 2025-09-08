@@ -1,0 +1,7 @@
+<Solution>
+  <Folder Name="/SolutionsFiles/">
+    <File Path="../.github/workflows/deploy.yml" />
+    <File Path="../scripts/deploy-entra-external-id.ps1" />
+  </Folder>
+  <Project Path="UserManager.csproj" />
+</Solution>
