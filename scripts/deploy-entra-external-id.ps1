@@ -119,5 +119,12 @@ $params =  @{
     }
 }
 
-# Deploy the External ID flow using Microsoft Graph API
-New-MgBetaIdentityAuthenticationEventFlow -BodyParameter $params
+# Check if the External ID flow exists
+$existingFlow = Get-MgBetaIdentityAuthenticationEventFlow | Where-Object { $_.displayName -eq "Default sign-up and sign-in" }
+
+if ($null -eq $existingFlow) {
+    # Create new flow if it doesn't exist
+    New-MgBetaIdentityAuthenticationEventFlow -BodyParameter $params
+}
+
+
