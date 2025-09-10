@@ -127,7 +127,6 @@ if ($null -eq $existingFlow) {
     New-MgBetaIdentityAuthenticationEventFlow -BodyParameter $params
 }
 
-
 $params =  @{
     id = "0"
     backgroundColor = "#3498DB"
